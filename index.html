@@ -8713,17 +8713,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const songSet = new Set();
   const songCounts = {};
 
-  // カウントと重複削除処理
-  allSongs.forEach(li => {
-    const name = li.textContent.trim();
-    if (!songCounts[name]) {
-      songCounts[name] = { count: 1, elements: [li] };
-    } else {
-      songCounts[name].count++;
-      songCounts[name].elements.push(li);
-    }
-    songSet.add(name);
-  });
+  // カウントと重複削除処理修正案：比較用の「きれいな名前」を作る
+allSongs.forEach(li => {
+  const originalName = li.textContent.trim();
+  
+  // 1. 全角スペースを半角に変換し、連続するスペースを1つにまとめ、前後の空白を消す
+  const normalizedName = originalName
+    .replace(/　/g, " ")       // 全角スペース -> 半角
+    .replace(/\s+/g, " ")      // 連続する空白 -> 1つの半角スペース
+    .trim();                   // 前後の空白削除
+
+  // 以降、この normalizedName を使って songCounts や songSet を処理する
+  if (!songCounts[normalizedName]) {
+    songCounts[normalizedName] = { count: 1, elements: [li], displayName: originalName };
+  } else {
+    songCounts[normalizedName].count++;
+    songCounts[normalizedName].elements.push(li);
+  }
+  songSet.add(normalizedName);
+});
 
    // 索引をクリックで表示させる
   document.getElementById("count-display").textContent = `🎤 合計歌枠回数: ${document.querySelectorAll("details > details > details").length} 回`;
